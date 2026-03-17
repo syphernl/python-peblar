@@ -29,6 +29,7 @@ from .models import (
     PeblarLogin,
     PeblarMeter,
     PeblarModbusApiAccess,
+    PeblarLedIntensity,
     PeblarReboot,
     PeblarSmartCharging,
     PeblarSystem,
@@ -39,7 +40,7 @@ from .models import (
 )
 
 if TYPE_CHECKING:
-    from peblar.const import AccessMode, PackageType, SmartChargingMode
+    from peblar.const import AccessMode, LedIntensityMode, PackageType, SmartChargingMode
 
 
 @dataclass(kw_only=True)
@@ -202,6 +203,19 @@ class Peblar:
             URL("config/user"),
             method=hdrs.METH_PATCH,
             data=PeblarSmartCharging(smart_charging=smart_charging_mode),
+        )
+
+    async def set_led_intensity(
+        self,
+        *,
+        mode: LedIntensityMode | None = None,
+        manual: int | None = None,
+    ) -> None:
+        """Set the LED intensity of the Peblar charger."""
+        await self.request(
+            URL("config/user"),
+            method=hdrs.METH_PATCH,
+            data=PeblarLedIntensity(led_intensity_mode=mode, led_intensity_manual=manual),
         )
 
     async def identify(self) -> None:

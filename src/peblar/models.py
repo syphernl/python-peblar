@@ -102,6 +102,18 @@ class PeblarModbusApiAccess(BaseModel):
 
 
 @dataclass(kw_only=True)
+class PeblarLedIntensity(BaseModel):
+    """Object holding the LED intensity configuration of a Peblar charger."""
+
+    led_intensity_mode: LedIntensityMode | None = field(
+        default=None, metadata=field_options(alias="HmiLedIntensityMode")
+    )
+    led_intensity_manual: int | None = field(
+        default=None, metadata=field_options(alias="HmiLedIntensityManual")
+    )
+
+
+@dataclass(kw_only=True)
 class PeblarLogin(BaseModel):
     """Login request for Peblar chargers."""
 

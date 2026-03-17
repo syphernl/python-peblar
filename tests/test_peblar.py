@@ -7,6 +7,7 @@ from aiohttp import ClientResponse, ClientSession
 from aresponses import Response, ResponsesMockServer
 
 from peblar import Peblar
+from peblar.const import LedIntensityMode
 from peblar.exceptions import (
     PeblarAuthenticationError,
     PeblarError,
@@ -57,6 +58,25 @@ async def test_http_error400(aresponses: ResponsesMockServer) -> None:
     async with Peblar(host="example.com") as peblar:
         with pytest.raises(PeblarError):
             await peblar.identify()
+
+
+async def test_set_led_intensity(aresponses: ResponsesMockServer) -> None:
+    """Test the set_led_intensity method."""
+
+    async def response_handler(request: ClientResponse) -> Response:
+        """Response handler for this test."""
+        data = await request.json()
+        assert data == {"HmiLedIntensityMode": LedIntensityMode.FIXED, "HmiLedIntensityManual": 50}
+        return aresponses.Response(status=200)
+
+    aresponses.add(
+        "example.com",
+        "/api/v1/config/user",
+        "PATCH",
+        response_handler,
+    )
+    async with Peblar(host="example.com") as peblar:
+        await peblar.set_led_intensity(mode=LedIntensityMode.FIXED, manual=50)
 
 
 async def test_unauthenticated_response(aresponses: ResponsesMockServer) -> None:
