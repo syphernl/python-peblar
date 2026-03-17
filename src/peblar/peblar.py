@@ -31,6 +31,7 @@ from .models import (
     PeblarModbusApiAccess,
     PeblarReboot,
     PeblarSmartCharging,
+    PeblarSocketLock,
     PeblarSystem,
     PeblarSystemInformation,
     PeblarUpdate,
@@ -202,6 +203,14 @@ class Peblar:
             URL("config/user"),
             method=hdrs.METH_PATCH,
             data=PeblarSmartCharging(smart_charging=smart_charging_mode),
+        )
+
+    async def socket_lock(self, *, locked: bool) -> None:
+        """Lock or unlock the EV socket."""
+        await self.request(
+            URL("config/user"),
+            method=hdrs.METH_PATCH,
+            data=PeblarSocketLock(user_keep_socket_locked=locked),
         )
 
     async def identify(self) -> None:

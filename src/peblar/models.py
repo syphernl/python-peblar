@@ -102,6 +102,15 @@ class PeblarModbusApiAccess(BaseModel):
 
 
 @dataclass(kw_only=True)
+class PeblarSocketLock(BaseModel):
+    """Object holding the socket lock configuration of a Peblar charger."""
+
+    user_keep_socket_locked: bool = field(
+        metadata=field_options(alias="UserKeepSocketLocked")
+    )
+
+
+@dataclass(kw_only=True)
 class PeblarLogin(BaseModel):
     """Login request for Peblar chargers."""
 

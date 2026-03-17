@@ -59,6 +59,25 @@ async def test_http_error400(aresponses: ResponsesMockServer) -> None:
             await peblar.identify()
 
 
+async def test_socket_lock(aresponses: ResponsesMockServer) -> None:
+    """Test the socket lock method."""
+
+    async def response_handler(request: ClientResponse) -> Response:
+        """Response handler for this test."""
+        data = await request.json()
+        assert data == {"UserKeepSocketLocked": True}
+        return aresponses.Response(status=200)
+
+    aresponses.add(
+        "example.com",
+        "/api/v1/config/user",
+        "PATCH",
+        response_handler,
+    )
+    async with Peblar(host="example.com") as peblar:
+        await peblar.socket_lock(locked=True)
+
+
 async def test_unauthenticated_response(aresponses: ResponsesMockServer) -> None:
     """Test authentication failure."""
     aresponses.add(
