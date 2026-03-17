@@ -521,6 +521,7 @@ class PeblarEVInterface(BaseModel):
     )
     cp_state: CPState = field(metadata=field_options(alias="CpState"))
     force_single_phase: bool = field(metadata=field_options(alias="Force1Phase"))
+    lock_state: bool = field(metadata=field_options(alias="LockState"))
 
 
 @dataclass(kw_only=True)
@@ -532,6 +533,9 @@ class PeblarEVInterfaceChange(BaseModel):
     )
     force_single_phase: bool | None = field(
         default=None, metadata=field_options(alias="Force1Phase")
+    )
+    lock_state: bool | None = field(
+        default=None, metadata=field_options(alias="LockState")
     )
 
 

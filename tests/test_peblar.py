@@ -6,7 +6,7 @@ import pytest
 from aiohttp import ClientResponse, ClientSession
 from aresponses import Response, ResponsesMockServer
 
-from peblar import Peblar
+from peblar import Peblar, PeblarApi
 from peblar.exceptions import (
     PeblarAuthenticationError,
     PeblarError,
@@ -57,6 +57,45 @@ async def test_http_error400(aresponses: ResponsesMockServer) -> None:
     async with Peblar(host="example.com") as peblar:
         with pytest.raises(PeblarError):
             await peblar.identify()
+
+
+async def test_ev_interface_lock_state(aresponses: ResponsesMockServer) -> None:
+    """Test that lock_state is parsed from and written to the EV interface.
+
+    NOTE: Requires hardware verification — it is unknown whether LockState
+    is accepted as a writable field by PATCH /api/wlac/v1/evinterface.
+    If the device returns 403, LockState is read-only via the local REST API.
+    """
+    ev_response = (
+        '{"CpState":"State B","LockState":true,"ChargeCurrentLimit":16000,'
+        '"ChargeCurrentLimitSource":"Current limiter","ChargeCurrentLimitActual":16000,'
+        '"Force1Phase":false}'
+    )
+
+    async def patch_handler(request: ClientResponse) -> Response:
+        """Response handler for PATCH."""
+        data = await request.json()
+        assert data == {"LockState": True}
+        return aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text=ev_response,
+        )
+
+    aresponses.add("example.com", "/api/wlac/v1/evinterface", "PATCH", patch_handler)
+    aresponses.add(
+        "example.com",
+        "/api/wlac/v1/evinterface",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text=ev_response,
+        ),
+    )
+    async with PeblarApi(host="example.com", token="test-token") as api:
+        ev = await api.ev_interface(lock_state=True)
+    assert ev.lock_state is True
 
 
 async def test_unauthenticated_response(aresponses: ResponsesMockServer) -> None:
