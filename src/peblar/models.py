@@ -102,6 +102,13 @@ class PeblarModbusApiAccess(BaseModel):
 
 
 @dataclass(kw_only=True)
+class PeblarBuzzerVolume(BaseModel):
+    """Object holding the buzzer volume configuration of a Peblar charger."""
+
+    buzzer_volume: SoundVolume = field(metadata=field_options(alias="HmiBuzzerVolume"))
+
+
+@dataclass(kw_only=True)
 class PeblarLogin(BaseModel):
     """Login request for Peblar chargers."""
 

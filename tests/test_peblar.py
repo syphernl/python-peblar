@@ -7,6 +7,7 @@ from aiohttp import ClientResponse, ClientSession
 from aresponses import Response, ResponsesMockServer
 
 from peblar import Peblar
+from peblar.const import SoundVolume
 from peblar.exceptions import (
     PeblarAuthenticationError,
     PeblarError,
@@ -57,6 +58,25 @@ async def test_http_error400(aresponses: ResponsesMockServer) -> None:
     async with Peblar(host="example.com") as peblar:
         with pytest.raises(PeblarError):
             await peblar.identify()
+
+
+async def test_set_buzzer_volume(aresponses: ResponsesMockServer) -> None:
+    """Test the set_buzzer_volume method."""
+
+    async def response_handler(request: ClientResponse) -> Response:
+        """Response handler for this test."""
+        data = await request.json()
+        assert data == {"HmiBuzzerVolume": SoundVolume.OFF}
+        return aresponses.Response(status=200)
+
+    aresponses.add(
+        "example.com",
+        "/api/v1/config/user",
+        "PATCH",
+        response_handler,
+    )
+    async with Peblar(host="example.com") as peblar:
+        await peblar.set_buzzer_volume(SoundVolume.OFF)
 
 
 async def test_unauthenticated_response(aresponses: ResponsesMockServer) -> None:

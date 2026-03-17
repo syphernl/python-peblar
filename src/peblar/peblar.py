@@ -22,6 +22,7 @@ from .exceptions import (
 from .models import (
     BaseModel,
     PeblarApiToken,
+    PeblarBuzzerVolume,
     PeblarEVInterface,
     PeblarEVInterfaceChange,
     PeblarHealth,
@@ -39,7 +40,7 @@ from .models import (
 )
 
 if TYPE_CHECKING:
-    from peblar.const import AccessMode, PackageType, SmartChargingMode
+    from peblar.const import AccessMode, PackageType, SmartChargingMode, SoundVolume
 
 
 @dataclass(kw_only=True)
@@ -202,6 +203,14 @@ class Peblar:
             URL("config/user"),
             method=hdrs.METH_PATCH,
             data=PeblarSmartCharging(smart_charging=smart_charging_mode),
+        )
+
+    async def set_buzzer_volume(self, volume: SoundVolume) -> None:
+        """Set the buzzer volume of the Peblar charger."""
+        await self.request(
+            URL("config/user"),
+            method=hdrs.METH_PATCH,
+            data=PeblarBuzzerVolume(buzzer_volume=volume),
         )
 
     async def identify(self) -> None:
